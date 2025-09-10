@@ -1,21 +1,48 @@
+import { db } from '../db';
+import { penaltyApplicationsTable } from '../db/schema';
 import { type PenaltyApplication } from '../schema';
+import { eq, desc } from 'drizzle-orm';
 
 export async function getPenaltyApplications(): Promise<PenaltyApplication[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all penalty applications from the database.
-    // Parents should be able to view all penalty applications for audit purposes.
-    return [];
+  try {
+    const results = await db.select()
+      .from(penaltyApplicationsTable)
+      .orderBy(desc(penaltyApplicationsTable.applied_at))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch penalty applications:', error);
+    throw error;
+  }
 }
 
 export async function getPenaltyApplicationsByKidId(kidId: number): Promise<PenaltyApplication[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all penalty applications for a specific kid from the database.
-    // Both parents and the specific kid should be able to view this information.
-    return [];
+  try {
+    const results = await db.select()
+      .from(penaltyApplicationsTable)
+      .where(eq(penaltyApplicationsTable.kid_id, kidId))
+      .orderBy(desc(penaltyApplicationsTable.applied_at))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch penalty applications for kid:', error);
+    throw error;
+  }
 }
 
 export async function getPenaltyApplicationsByParentId(parentId: number): Promise<PenaltyApplication[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all penalty applications made by a specific parent from the database.
-    return [];
+  try {
+    const results = await db.select()
+      .from(penaltyApplicationsTable)
+      .where(eq(penaltyApplicationsTable.applied_by_parent_id, parentId))
+      .orderBy(desc(penaltyApplicationsTable.applied_at))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch penalty applications by parent:', error);
+    throw error;
+  }
 }

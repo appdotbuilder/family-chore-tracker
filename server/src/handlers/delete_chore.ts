@@ -1,7 +1,25 @@
-export async function deleteChore(choreId: number): Promise<void> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a chore from the database.
-    // This should validate that the chore exists and only allow parents to delete chores.
-    // Consider soft deletion or archiving instead of hard deletion for audit purposes.
-    return Promise.resolve();
-}
+import { db } from '../db';
+import { choresTable } from '../db/schema';
+import { eq } from 'drizzle-orm';
+
+export const deleteChore = async (choreId: number): Promise<void> => {
+  try {
+    // Check if chore exists first
+    const existingChore = await db.select()
+      .from(choresTable)
+      .where(eq(choresTable.id, choreId))
+      .execute();
+
+    if (existingChore.length === 0) {
+      throw new Error('Chore not found');
+    }
+
+    // Delete the chore from database
+    await db.delete(choresTable)
+      .where(eq(choresTable.id, choreId))
+      .execute();
+  } catch (error) {
+    console.error('Chore deletion failed:', error);
+    throw error;
+  }
+};

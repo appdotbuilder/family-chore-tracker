@@ -1,25 +1,59 @@
+import { db } from '../db';
+import { choresTable } from '../db/schema';
 import { type Chore } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export async function getChores(): Promise<Chore[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all chores from the database.
-    return [];
+  try {
+    const results = await db.select()
+      .from(choresTable)
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch chores:', error);
+    throw error;
+  }
 }
 
 export async function getChoresByKidId(kidId: number): Promise<Chore[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all chores assigned to a specific kid from the database.
-    return [];
+  try {
+    const results = await db.select()
+      .from(choresTable)
+      .where(eq(choresTable.assigned_kid_id, kidId))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch chores by kid ID:', error);
+    throw error;
+  }
 }
 
 export async function getChoresByParentId(parentId: number): Promise<Chore[]> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all chores created by a specific parent from the database.
-    return [];
+  try {
+    const results = await db.select()
+      .from(choresTable)
+      .where(eq(choresTable.created_by_parent_id, parentId))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Failed to fetch chores by parent ID:', error);
+    throw error;
+  }
 }
 
 export async function getChoreById(id: number): Promise<Chore | null> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a specific chore by ID from the database.
-    return null;
+  try {
+    const results = await db.select()
+      .from(choresTable)
+      .where(eq(choresTable.id, id))
+      .execute();
+
+    return results.length > 0 ? results[0] : null;
+  } catch (error) {
+    console.error('Failed to fetch chore by ID:', error);
+    throw error;
+  }
 }

@@ -1,20 +1,52 @@
+import { db } from '../db';
+import { rewardRequestsTable, rewardsTable, usersTable } from '../db/schema';
 import { type CreateRewardRequestInput, type RewardRequest } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export async function createRewardRequest(input: CreateRewardRequestInput): Promise<RewardRequest> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new reward request and persisting it in the database.
-    // This should:
+  try {
     // 1. Validate that the reward exists
+    const reward = await db.select()
+      .from(rewardsTable)
+      .where(eq(rewardsTable.id, input.reward_id))
+      .execute();
+
+    if (reward.length === 0) {
+      throw new Error('Reward not found');
+    }
+
     // 2. Validate that the kid exists and has enough points for the reward
+    const kid = await db.select()
+      .from(usersTable)
+      .where(eq(usersTable.id, input.kid_id))
+      .execute();
+
+    if (kid.length === 0) {
+      throw new Error('Kid not found');
+    }
+
+    const kidUser = kid[0];
+    if (kidUser.role !== 'kid') {
+      throw new Error('Only kids can request rewards');
+    }
+
+    if (kidUser.points < reward[0].point_cost) {
+      throw new Error('Insufficient points for this reward');
+    }
+
     // 3. Create the reward request with status 'pending'
-    // Only kids should be able to request rewards.
-    return Promise.resolve({
-        id: 0, // Placeholder ID
+    const result = await db.insert(rewardRequestsTable)
+      .values({
         reward_id: input.reward_id,
         kid_id: input.kid_id,
-        status: 'pending' as const,
-        requested_at: new Date(),
-        processed_at: null,
-        processed_by_parent_id: null
-    } as RewardRequest);
+        status: 'pending'
+      })
+      .returning()
+      .execute();
+
+    return result[0];
+  } catch (error) {
+    console.error('Reward request creation failed:', error);
+    throw error;
+  }
 }
